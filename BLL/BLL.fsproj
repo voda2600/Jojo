@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\DAL\DAL.csproj" />
+      <ProjectReference Include="..\ViewModels\ViewModels.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Include="CityLogic.fs" />
+      <Compile Include="OutputModels.fs" />
+      <Compile Include="AccountLogic.fs" />
+      <Compile Include="ProductLogic.fs" />
+      <Compile Include="ProfileLogic.fs" />
+
+      <Compile Include="CategoryProductLogic.fs" />
+
+      <Compile Include="CategoriesLogic.fs" />
+      <Compile Include="CommentLogic.fs" />
+      <Compile Include="CardLogic.fs" />
+      <Compile Include="OrderLogic.fs" />
+    </ItemGroup>
+
+</Project>

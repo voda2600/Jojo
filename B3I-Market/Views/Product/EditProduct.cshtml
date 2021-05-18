@@ -1,0 +1,150 @@
+﻿@using System.Collections
+@model DAL.Models.Product
+<div class="account_area" xmlns="http://www.w3.org/1999/html">
+    <div class="container">
+        @if (TempData.ContainsKey("Success"))
+        {
+            <h3 style="text-align: center;">@TempData["Success"]</h3>
+        }
+        <form enctype="multipart/form-data" asp-controller="Product" asp-action="EditProductForm" method="post">
+            <div class="row">
+                <div id="customer_details">
+                    <div class="col-md-6">
+                        <div asp-validation-summary="ModelOnly"></div>
+                        <div class="woocommerce-billing-fields create-account w-100">
+                            <h3>Editing product</h3>
+                            <p id="billing_country_field" class="form-row form-row-wide address-field update_totals_on_change validate-required woocommerce-validated">
+                                <label class="" for="category">
+                                    Category: @Model.CategoryName
+                                </label>
+                                <input type="hidden" asp-for="CategoryName" value="@Model.CategoryName">
+                                <input type="hidden" value="@Model._id" name="_id">
+                                <input type="hidden" value="@Model.PhotoPath" name="_photoPath">
+                                <br />
+<p id="billing_first_name_field" class="form-row form-row-first validate-required">
+                                <label class="" for="billing_first_name">
+                                    Name
+                                </label>
+                                <input type="text" name="Name" value="@Model.Name"  maxlength="70" placeholder="" id="billing_first_name" class="input-text ">
+                                <span asp-validation-for="Name"></span>
+                            </p>
+
+                            <p id="billing_last_name_field" class="form-row form-row-last validate-required">
+                                <label class="" for="billing_last_name">
+                                    Price
+                                </label>
+                                <input name="Price" type="number" value="@Model.Price" placeholder="" id="billing_last_name" class="input-text ">
+                                <span asp-validation-for="Price"></span>
+                            </p>
+                            <div class="clear"></div>
+
+                            <p id="billing_company_field" class="form-row form-row-wide">
+                                <label class="" for="billing_company">Brand</label>
+                                <input name="Brand" type="text" value="@Model.Brand"  maxlength="30" placeholder="" id="billing_company" class="input-text ">
+                                <span asp-validation-for="Brand"></span>
+                            </p>
+                            <p id="billing_company_field" class="form-row form-row-wide">
+                                <label class="" for="billing_company">Photo</label>
+                                <input type="file" accept=".png, .jpg, .jpeg, .gif" value="@Model.PhotoPath" placeholder="@Model.PhotoPath" name="Photo" class="input-text">
+                            </p>
+                         
+                            <p id="billing_company_field" class="form-row form-row-wide">
+                                <label class="" for="billing_company">Description</label>
+                                <textarea name="Description" id="Review" cols="30" rows="10">@Model.Description</textarea>
+                            </p>
+
+                            <button type="submit">Edit</button>
+
+                        </div>
+                    </div>
+                           <div id="characteristics" class="col-md-6">
+                    </div>
+                </div>
+            </div>
+        </form>
+
+
+    </div>
+</div>
+<script>
+function EmptyIfNull(s){
+    if(s == null){
+        return " ";
+        }else{
+        return s;
+        }
+}
+
+function AddCharacter(jsonFile){
+    console.log(jsonFile)
+    document.getElementById("characteristics").innerHTML="";
+    let j = 0;
+    for (let i = 0;i<jsonFile.length;i++){
+        let elem = document.createElement("div");
+        if (jsonFile[i]["type"] == "string"){
+
+            elem.innerHTML = "<div class=\"form-group row\">\n"+
+                              "    <label class=\"col-sm-2 col-form-label\">"+jsonFile[i]["name"]+"</label>\n"+
+                              "    <div class=\"col-sm-8\">"+
+                              "      <input type='hidden' name='Characteristics["+j+"].Name' value='"+jsonFile[i]["name"]+"'>"+
+                              "      <input type='hidden' name='Characteristics["+j+"].Type' value='"+jsonFile[i]["type"]+"'>"+
+                              "      <input type='hidden' name='Characteristics["+j+"].Unit' value='"+EmptyIfNull(jsonFile[i]["unit"])+"'>"+
+                "      <input type=\"text\"  maxlength=\"40\" class=\"form-control\" value=\"" + jsonFile[i]["value"] + "\" name='Characteristics[" + j +"].ValueString' required>\n"+
+                              "    </div>"+
+                              "    <label class=\"col-sm-2 col-form-label\">"+EmptyIfNull(jsonFile[i]["unit"])+"</label>\n"+
+                              "  </div>";
+            j++;
+        }
+        else if (jsonFile[i]["type"] == "bool" && jsonFile[i]["value"]=="true"){
+            elem.innerHTML = " <div class=\"form-group row\">\n"+
+                              "                            <label class=\"col-sm-2 col-form-label\">"+jsonFile[i]["name"]+"</label>\n"+
+                              "                            <div class=\"col-sm-8\">\n"+
+                              "      <input type='hidden' name='Characteristics["+j+"].Name' value='"+jsonFile[i]["name"]+"'>"+
+                              "      <input type='hidden' name='Characteristics["+j+"].Type' value='"+jsonFile[i]["type"]+"'>"+
+                              "      <input type='hidden' name='Characteristics["+j+"].Unit' value='"+EmptyIfNull(jsonFile[i]["unit"])+"'>"+
+                              "                                <select name='Characteristics["+j+"].ValueString' style=\"padding: 6px 12px !important;\" class=\"form-control\">\n"+
+                              "                                    <option selected value=\"true\">Yes</option>\n"+
+                              "                                    <option value=\"false\">No</option>\n"+
+                              "                                </select>\n"+
+                              "                            </div>\n"+
+                              "                        </div>";
+            j++;
+
+        }
+        else if (jsonFile[i]["type"] == "bool" && jsonFile[i]["value"] == "false") {
+            elem.innerHTML = " <div class=\"form-group row\">\n" +
+                "                            <label class=\"col-sm-2 col-form-label\">" + jsonFile[i]["name"] + "</label>\n" +
+                "                            <div class=\"col-sm-8\">\n" +
+                "      <input type='hidden' name='Characteristics[" + j + "].Name' value='" + jsonFile[i]["name"] + "'>" +
+                "      <input type='hidden' name='Characteristics[" + j + "].Type' value='" + jsonFile[i]["type"] + "'>" +
+                "      <input type='hidden' name='Characteristics[" + j + "].Unit' value='" + EmptyIfNull(jsonFile[i]["unit"]) + "'>" +
+                "                                <select name='Characteristics[" + j + "].ValueString' style=\"padding: 6px 12px !important;\" class=\"form-control\">\n" +
+                "                                    <option value=\"true\">Yes</option>\n" +
+                "                                    <option selected value=\"false\">No</option>\n" +
+                "                                </select>\n" +
+                "                            </div>\n" +
+                "                        </div>";
+            j++;
+
+        }
+        else if (jsonFile[i]["type"] == "number"){
+            elem.innerHTML = "<div class=\"form-group row\">\n"+
+                                          "    <label class=\"col-sm-2 col-form-label\">"+jsonFile[i]["name"]+"</label>\n"+
+                                          "    <div class=\"col-sm-8\">\n"+
+                                          "      <input type='hidden' name='Characteristics["+j+"].Name' value='"+jsonFile[i]["name"]+"'>"+
+                                          "      <input type='hidden' name='Characteristics["+j+"].Type' value='"+jsonFile[i]["type"]+"'>"+
+                                          "      <input type='hidden' name='Characteristics["+j+"].Unit' value='"+EmptyIfNull(jsonFile[i]["unit"])+"'>"+
+                "      <input type=\"number\" maxlength=\"70\" step='0.1' class=\"form-control\" name='Characteristics[" + j + "].ValueString'  value='" + jsonFile[i]["value"] +"' required>\n"+
+                                          "    </div>"+
+                                          "    <label class=\"col-sm-2 col-form-label\">"+EmptyIfNull(jsonFile[i]["unit"])+"</label>\n"+
+                                          "  </div>";
+            j++;
+            }
+        document.getElementById("characteristics").appendChild(elem);
+    }
+}
+</script>
+@{var newJsonChar = Json.Serialize(Model.Characteristics);}
+<script>
+    AddCharacter(@newJsonChar);
+</script>

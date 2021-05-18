@@ -1,0 +1,218 @@
+@using Microsoft.AspNetCore.Mvc.ModelBinding
+@using BLL
+@using DAL.Models
+@using Microsoft.AspNetCore.Http
+@using B3I_Market.Helpers
+@model BLL.OutputModelsForProduct.ProductPage
+<link rel="stylesheet" href="/css/main.css">
+<div class="container">
+    <div class="row">
+        <div class="product-breadcroumb">
+            <a asp-controller="Home" asp-action="Index">Home</a>
+            <a asp-controller="Product" asp-action="CategoryProducts" asp-route-category="@Model.GetProduct.CategoryName">@Model.GetProduct.CategoryName</a>
+            <a asp-controller="Product" asp-action="Index" asp-route-id="@Model.GetProduct._id.ToString()">@Model.GetProduct.Name</a>
+        </div>
+        <div class="col-4">
+            <div class="product-main-img">
+                <img src="@Model.GetProduct.PhotoPath" alt="">
+            </div>
+        </div>
+        <div id="container" class="col-8">
+            <h2 class="product-name">@Model.GetProduct.Name</h2>
+
+            <b>Reviews: @Model.ReviewsCount</b><br><b>Rating: @Model.GetRating/5</b>
+            <div class="product-inner-price">
+                <ins>@Model.GetProduct.Price₽</ins>
+            </div>
+            @if (!Model.GetProduct.IsAvailable())
+            {
+                <h3>Product is no longer available!</h3>
+            }
+            else if (User.IsInRole("User"))
+            {
+                @if (!Context.Session.Get<Dictionary<string, int>>("Card").Keys.Contains(Model.GetProduct._id.ToString()))
+                {
+                    <button id="toCard" onclick="AddToCard('@Model.GetProduct._id.ToString()')" class="add_to_cart_button" type="submit">Add to cart</button>
+                }
+                else
+                {
+                    <h3>Product in Card</h3>
+                }
+            }
+            else if (User.IsInRole("Admin"))
+            {
+
+                <form asp-controller="Product" asp-action="EditProduct">
+            <input type="hidden" name="_id" value="@Model.GetProduct._id"/>
+            <button class="add_to_cart_button" type="submit">Edit</button></form>
+            <br />
+               
+                @if (User.Identity.IsAuthenticated)
+                {
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <form method="post" asp-action="DeleteProduct">
+                            <input type="hidden" value="@Model.GetProduct._id" name="_id" />
+                            <button class="add_to_cart_button" type="submit" style="background-color:#e38072;">
+                                Delete
+                            </button>
+                        </form>
+                    }
+                }
+            }
+            else if (!User.Identity.IsAuthenticated)
+            {
+                <h3>Log In to buy!</h3>
+            }
+        </div>
+    </div>
+    <!----------------------------------------------->
+</div>
+<div class="container">
+    <div>
+        <h2>Product Description</h2>
+        <p>@Model.GetProduct.Description</p>
+    </div>
+
+    <!----------------Characteristics---------------->
+    <table>
+        <thead>
+        </thead>
+        <tbody>
+        @if (Model.GetProduct.Characteristics != null)
+        {
+            @foreach (var parameter in Model.GetProduct.Characteristics)
+            {
+                <tr>
+                    <td>@parameter.Name</td>
+                    @if (parameter.Type != "bool")
+                    {
+                        <td>@parameter.Value @parameter.Unit</td>
+                    }
+                    else
+                    {
+                        @if (parameter.Value)
+                        {
+                            <td>Yes</td>
+                        }
+                        else if (!parameter.Value)
+                        {
+                            <td>No</td>
+                        }
+                        else
+                        {
+                            <td>Not stated</td>
+                        }
+                    }
+                </tr>
+            }
+        }
+        </tbody>
+    </table>
+</div>
+<!----------------Characteristics---------------->
+<!----------------------Comments--------->
+
+<div style="overflow: auto; height: 200px;" class="container">
+
+    <div id="comments" class="row d-flex justify-content-center">
+        <div>
+            <div class="headings d-flex justify-content-between align-items-center">
+                <h3>Reviews</h3>
+            </div>
+            @if (Model.ReviewsCount == 0)
+            {
+                <h2 id="no-review">No reviews</h2>
+                @if (TempData.ContainsKey("DeleteStatus"))
+                {
+                    <span>@TempData["DeleteStatus"]</span>
+                }
+            }
+            else
+            {
+                @foreach (var comment in Model.GetComments)
+                {
+                    @await Html.PartialAsync("CommentCard", comment)
+                }
+            }
+        </div>
+    </div>
+</div>
+@if (User.Identity.IsAuthenticated)
+{
+    <div class="container">
+        <h3>Your review</h3>
+        <span style="color: red;" class="help-block">@TempData["CommentError"]</span>
+        <form method="post" asp-action="Index" asp-route-productId="@Model.GetProduct._id.ToString()">
+            <div class="submit-review">
+                <div class="rating-chooser">
+                    <p>Your rating</p>
+                    <input type="number" size="4" class="input-text qty text" title="Qty" value="1" name="Qty" min="1" step="1" max="5">
+                </div>
+                <p><label for="Review">Your review</label> <textarea name="Review" id="Review" cols="30" rows="10"></textarea></p>
+                <p><input type="submit" value="Submit"></p>
+            </div>
+        </form>
+    </div>
+}
+<!----------------------Comments----------------->
+        <!----------RelatedProduct-------->
+<div class="single-product-area">
+    <div class="container">
+        <h2 class="related-products-title">Related Products</h2>
+        <div class="row">
+            @if (Model.GetRelatedProducts != null && Model.GetRelatedProducts?.Count!=0)
+            {
+                @foreach (var product in Model.GetRelatedProducts)
+                {
+                    <div class="col-md-3 col-sm-6">
+                        <div class="single-shop-product">
+                            <div class="product-upper">
+                                <img src="@product.PhotoPath" alt="">
+                            </div>
+                            <h2><a asp-controller="Product" asp-action="Index" asp-route-id="@product._id.ToString()">@product.Name</a></h2>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="col-md-3 col-sm-6">
+                    <h3>No related products!</h3>
+                </div>
+            }
+            
+        </div>
+    </div>
+</div>
+<script src="/lib/jquery-ajax-unobtrusive/dist/jquery.unobtrusive-ajax.min.js"></script>
+
+<script >
+function OnReviewComplete(){
+    document.getElementById("no-review").remove();
+    document.getElementById("Review").value = "";
+    }
+
+function AddToCard(productId){
+    $.ajax({
+            type: "POST",
+                    url: "@Url.Action("AddToCard", "Product")",
+                    data: {productId: productId},
+                    dataType: "text",
+                    success: function (msg) {
+                        let button = document.getElementById("toCard");
+                        button.remove();
+                        let message = document.createElement("h3");
+                        message.innerText=String(msg);
+                        document.getElementById("container").appendChild(message);
+                        $("#Card").load(" #Card > *");
+                    },
+                    error: function (error) {
+                        alert(error);
+                    }
+                    
+        });
+}    
+</script>
+
+        

@@ -1,0 +1,32 @@
+@using DAL.Models
+@model Comment
+@{
+    var comment = Model;
+}
+@if (comment != null)
+{
+    <div style="margin: 2px;" class="card p-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="user d-flex flex-row align-items-center"> <span><b style="display: inline;" class="font-weight-bold text-primary">@comment.Username:</b>
+                <p class="font-weight-bold">@comment.Content</p></span> </div>
+            <small>
+                @comment.Mark/5
+                @if (User.IsInRole("Admin"))
+                {
+                    <a asp-controller="Product" asp-action="DeleteComment" asp-route-product="@comment.Product" asp-route-id="@comment.Id">Delete</a>
+                    
+                    
+                }
+            </small>
+
+
+        </div>
+    </div>
+}
+else if(TempData.Keys.Contains("CommentError"))
+{
+    <h2 id="no-review">No reviews</h2>
+    <script>alert('@TempData["CommentError"]')</script>
+    
+}
+

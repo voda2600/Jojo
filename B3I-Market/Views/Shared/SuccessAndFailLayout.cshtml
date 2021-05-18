@@ -1,0 +1,19 @@
+﻿<html>
+<head>
+    <link href="https://fonts.googleapis.com/css?family=Nunito+Sans:400,400i,700,900&display=swap" rel="stylesheet">
+    <link href="~/css/successAndFail.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div class="card">
+        @RenderBody()
+        <small>You will be redirected just in second <br> if not, <a asp-controller="Home" asp-action="Index">click here</a></small>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
+    <script>
+$(document).ready(function() {
+    window.setTimeout(function(){window.location.href = "/"},5000);
+});
+    </script>
+</body>
+</html>

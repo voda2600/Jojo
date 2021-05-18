@@ -1,0 +1,115 @@
+﻿@model string
+
+<div class="account_area" xmlns="http://www.w3.org/1999/html">
+    <div class="container">
+        <h3 style="color: green;text-align: center;">@Model</h3>
+        <div class="row">
+            <h2>New Category Form</h2>
+            <div id="customer_details" class="col2-set create-account">
+                <div class="col-1">
+                    <form id="Add" enctype="multipart/form-data" asp-action="NewCategory" asp-controller="Product">
+                        <div class="woocommerce-billing-fields">
+                            <h3>Adding new category</h3>
+                            @if (TempData.ContainsKey("CategoryError"))
+                            {
+                                <span style="color: red;">@TempData["CategoryError"]</span>
+                            }
+                            <p id="billing_first_name_field" class="form-row form-row-first validate-required">
+                                <label class="" for="billing_first_name">
+                                    Write category name<abbr title="required" class="required">*</abbr>
+                                </label>
+                                <input type="text" value="" placeholder="" id="billing_first_name" name="Name" class="input-text ">
+                                <div class="form-group">
+                                    <label for="picture">Picture of category</label>
+                                    <input type="file" id="picture"  runat="server" name="picture" accept=".png, .jpg, .jpeg, .gif">
+                                </div>
+                                <div id="parentId">
+                                    <div>
+                                    </div>
+                                </div>
+                                <td class="field-add">
+                                    <button type="submit" title="add this item" onclick="return addField()" class="add" href="#">+</button>
+                                </td>
+                                <script>
+    var countOfFields = 0; // Текущее число полей
+
+    var curFieldNameId = -1; // Уникальное значение для атрибута name
+
+    var maxFieldLimit = 100; // Максимальное число возможных полей
+    function deleteField(a) {
+     // Получаем доступ к ДИВу, содержащему поле
+     var contDiv = a.parentNode;
+     // Удаляем этот ДИВ из DOM-дерева
+     contDiv.parentNode.removeChild(contDiv);
+     // Уменьшаем значение текущего числа полей
+     countOfFields--;
+     // Возвращаем false, чтобы не было перехода по сслыке
+     return false;
+    }
+    function addField() {
+     // Проверяем, не достигло ли число полей максимума
+     if (countOfFields >= maxFieldLimit) {
+     alert("Число полей достигло своего максимума = " + maxFieldLimit);
+     return false;
+     }
+     // Увеличиваем текущее значение числа полей
+     countOfFields++;
+     // Увеличиваем ID
+     curFieldNameId++;
+     // Создаем элемент ДИВ
+        var div = document.createElement("div");
+        div.style.border = "1px solid  rgba(0,0,0,0.3)";
+        div.style.padding = "5px";
+        div.style.marginBottom = "5px";
+     // Добавляем HTML-контент с пом. свойства innerHTML
+
+        div.innerHTML = "<a title=\"Remove this item\" onclick=\"return deleteField(this)\" class=\"remove\" style='color: red; float: right; margin: auto' href=\"#\"><button type=\"submit\" style=\"background-color: #d9534f; margin: 4px\">remove</button></a><input id='Name"+curFieldNameId+"' name=\"NameC\" type=\"text\" placeholder=\"field name\" /> <select onchange='DisableUnit(\"Type"+curFieldNameId+"\",\"Unit"+curFieldNameId+"\" )' size=\"1\" id='Type"+curFieldNameId+"' name=\"Type\"><option value=\"string\">text</option><option value=\"number\">numb</option><option value=\"bool\">bool</option></select><input id='Unit"+curFieldNameId+"' name=\"Unit\"  placeholder=\"Unit\" type=\"text\" /><td class = \"product-remove\"></td>";
+
+     // Добавляем новый узел в конец списка полей
+     document.getElementById("parentId").appendChild(div);
+     // Возвращаем false, чтобы не было перехода по сслыке
+     return false;
+    }
+                                </script>
+                            </p>
+
+                        </div>
+                    
+                        <button onclick="SubmitForm()" type="submit">Create new category</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script >
+function SubmitForm(){
+    let names = document.getElementsByName("NameC");
+    let types = document.getElementsByName("Type");
+    let units = document.getElementsByName("Unit");
+    let i = 0;
+    while(names.length!==0){
+        let id = names[0].id;
+        document.getElementById(id).name = "Characteristics["+i+"].Name";
+        id = types[0].id;
+        document.getElementById(id).name = "Characteristics["+i+"].Type";
+        id = units[0].id;
+        document.getElementById(id).name = "Characteristics["+i+"].Unit";
+        i++;
+    }
+    document.getElementById("Add").submit();
+    
+    
+}
+function DisableUnit(idOfSelect, idOfBool){
+    if (document.getElementById(idOfSelect).value==='bool'){
+        document.getElementById(idOfBool).value = '';
+        document.getElementById(idOfBool).disabled = true;
+        }
+    else{
+        document.getElementById(idOfBool).disabled = false;
+        }
+    }
+    
+</script>
+

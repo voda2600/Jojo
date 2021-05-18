@@ -1,0 +1,145 @@
+﻿@model Dictionary<DAL.Models.Product, int>
+@{
+    if (Model != null)
+    {
+        var total = Model.Select(p => p.Key.Price * p.Value).Sum();
+    }
+}
+<div style="margin-top: 2rem;" class="container">
+    @TempData["UnavaliableProdsMessage"]
+    @if (Model != null)
+    {
+        var total = Model.Select(p => p.Key.Price * p.Value).Sum();
+        <table cellspacing="0" class="shop_table cart">
+            <thead>
+                <tr>
+                    <th class="product-remove">&nbsp;</th>
+                    <th class="product-thumbnail">&nbsp;</th>
+                    <th class="product-name">Product</th>
+                    <th class="product-price">Price</th>
+                    <th class="product-quantity">Quantity</th>
+                    <th class="product-subtotal">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var (product, qty) in Model)
+                {
+                    <!----------------Row------------------>
+                    <tr id="@product._id" class="cart_item">
+                        <td class="product-remove">
+                            <a title="Remove this item" class="remove" asp-controller="Order" asp-action="RemoveFromCard" asp-route-productId="@product._id">×</a>
+                        </td>
+
+                        <td class="product-thumbnail">
+                            <a asp-controller="Product" asp-action="Index" asp-route-id="@product._id.ToString()"><img width="145" height="145" alt="poster_1_up" class="shop_thumbnail" src="@product.PhotoPath"></a>
+                        </td>
+
+                        <td class="product-name">
+                            <a asp-controller="Product" asp-action="Index" asp-route-id="@product._id.ToString()">@product.Name</a>
+                        </td>
+
+                        <td class="product-price">
+                            <span class="amount">@product.Price</span>₽
+                        </td>
+
+                        <td class="product-quantity">
+                            <div class="quantity buttons_added">
+                                <input type="number" size="4" class="input-text qty text" title="Qty" value="@qty" min="1" max="9" step="1" onchange="ChangeQty(event)">
+                            </div>
+                        </td>
+                        @{
+                            var subtotal = product.Price * qty;
+                        }
+                        <td class="product-subtotal">
+                            <span class="amount">@subtotal</span>
+                        </td>
+                    </tr>
+                            }
+            </tbody>
+        </table>
+        <!-------------------Row--------------------->
+        <!-------------------Total------------------->
+
+        <div class="cart_totals">
+            <h2>Cart Totals</h2>
+            <table cellspacing="0">
+                <tbody>
+                    <tr class="cart-subtotal">
+                        <th>Total</th>
+                        <td><span class="amount">@total</span></td>
+                    </tr>
+
+                    <tr class="shipping">
+                        <th>Type of delivery</th>
+                        <td id="DeliveryTypeTotal"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <!-------------------Total------------------->
+        <!--------Register------------>
+<form asp-action="PaymentInfo" id="order" method="post" class="shipping_calculator">
+    <h2><a class="shipping-calculator-button" data-toggle="collapse" href="#calcalute-shipping-wrap" aria-expanded="false" aria-controls="calcalute-shipping-wrap">Confirm order</a></h2>
+    <section id="calcalute-shipping-wrap" class="shipping-calculator-form collapse" style="width:45rem">
+
+
+        <p class="form-row form-row-wide">
+            <select required name="DelivetyType" onchange="DeliveryType()" id="deliveryType">
+                <option value="">Select Delivery Type</option>
+                <option value="PickUp">Pick Up</option>
+                <option value="Delivery">Courier delivery</option>
+            </select>
+        </p>
+        <input type="hidden" name="TotalPrice" value="@total" />
+    </section>
+</form>
+                        <!---------Register-------->
+                            }
+                            else
+                            {
+<h1 style="margin-bottom: 20px; margin-top: 20px;">Your shopping cart is empty</h1>
+                            }
+                            </div>
+
+<script src="/js/main.js"></script>
+<script>
+    function ChangeQty(event) {
+        let div = event.currentTarget.parentElement;
+        let td = div.parentElement;
+        let id = td.parentElement.id;
+        let qty = event.currentTarget.value;
+        $.ajax({
+        type: "POST",
+        url: "@Url.Action("QtyChange", "Order")",
+            data: {
+                productId: id,
+                qty: qty
+        },
+        dataType: "json",
+            success: function (msg) {
+                let tag = document.getElementById(id);
+                let productPrice = tag.querySelector('.product-price');
+                let priceSpan = productPrice.querySelector('span');
+                let price = priceSpan.innerText;
+                tag.querySelector('.product-subtotal').querySelector('span').innerText = price * qty;
+                CalculateTotal();
+            },
+            error: function (req, status, error) {
+            alert(error);
+            }
+        });
+    }
+    function CalculateTotal() {
+        let products = document.querySelectorAll('.cart_item');
+        let total = document.querySelector('.cart_totals');
+        let totalValue = total.querySelector('.amount');
+        totalValue.innerText = 0;
+        for (let i = 0; i < products.length; i++)
+        {
+            let subtotal = products[i].querySelector('.product-subtotal');
+            let subtotalSpan = subtotal.querySelector('span');
+            let subtotalValue = subtotalSpan.innerText;
+            totalValue.innerText = Number(totalValue.innerText) + Number(subtotalValue);
+        }
+    }
+</script>

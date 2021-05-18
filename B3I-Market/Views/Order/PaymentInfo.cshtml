@@ -1,0 +1,88 @@
+﻿@model ViewModels.OrderConfirmViewModel
+@{
+    Layout = null;
+}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/css/payment.css">
+</head>
+<body>
+    <form id="payment-form" asp-action="PaymentInfoAcceptance" method="post">
+        <div id="card-success" class="hidden">
+            <i class="fa fa-check"></i>
+            <p>Payment Successful!</p>
+        </div>
+        <div id="form-errors" class="hidden">
+            <i class="fa fa-exclamation-triangle"></i>
+            <p id="card-error">Card error</p>
+        </div>
+        <div id="form-container">
+            <div id="card-front">
+                <div id="shadow"></div>
+                <div id="image-container">
+                    <span id="amount">paying: <strong>@Model.TotalPrice ₽</strong></span>
+                    <span id="card-image">
+
+                    </span>
+                </div>
+                <!--- end card image container --->
+
+                <label for="card-number">
+                    Card Number
+                </label>
+                <input required title="The card number must consist of 16 digits without spaces" pattern="\d{16}" name="CardNumber" id="card-number" placeholder="1234 5678 9101 1112" value="@Model.CardNumber">
+                <div id="cardholder-container">
+                    <label for="card-holder">
+                        Card Holder
+                    </label>
+                    <input required title="The name must consist of 16 upper case letters" pattern="([A-Z]+\s[A-Z]+)" name="Name" type="text" id="card-holder" placeholder="e.g. John Doe" maxlength="16" value="@Model.Name" />
+                </div>
+                <!--- end card holder container --->
+                <div id="exp-container">
+                    <label for="card-exp">
+                        Expiration
+                    </label>
+                    <input style="padding: 0 0 0 3px; margin: 0;" required name="cardYear" id="card-year" type="number" min="@DateTime.Now.Year" max="2036" placeholder="YY" value="@Model.CardYear">
+                    <input style="padding: 0 0 0 3px; margin: 0;" required name="cardMonth" id="card-month" type="number" min="1" max="12" placeholder="MM" value="@Model.CardMonth">
+                    @if (TempData["CardUnavaliable"] != null)
+                    {
+                        <p style="color: red;">@TempData["CardUnavaliable"]</p>
+                    }
+                </div>
+                <div id="cvc-container">
+                    <label for="card-cvc"> CVC/CVV</label>
+                    <input required title="The CCV must consist of 3 or 4 digits" pattern="[0-9]{3,4}" name="CCV" id="card-cvc" placeholder="XXX-X" type="text" min-length="3" max-length="4" value="@Model.CCV">
+                    <p>Last 3 or 4 digits</p>
+                </div>
+                <!--- end CVC container --->
+                <!--- end exp container --->
+            </div>
+            <!--- end card front --->
+            <div id="card-back">
+                <div id="card-stripe">
+                </div>
+
+            </div>
+            <!--- end card back --->
+            <input type="text" id="card-token" />
+            <input type="hidden" name="DelivetyType" value="@Model.DelivetyType" />
+            <input type="hidden" name="Address" value="@Model.Address" />
+            <input type="hidden" name="TotalPrice" value="@Model.TotalPrice" />
+            <button type="submit" id="card-btn">Submit</button>
+
+        </div>
+    </form>
+    <!--- end form container --->
+
+    <script src="js/payment.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script type="text/javascript" src="https://js.stripe.com/v2/"></script>
+    <script src="https://use.fontawesome.com/f1e0bf0cbc.js"></script>
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.3/dist/jquery.validate.min.js"></script>
+</body >
+</html >

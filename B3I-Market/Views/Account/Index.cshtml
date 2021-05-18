@@ -1,0 +1,236 @@
+﻿@using Microsoft.AspNetCore.Server.Kestrel.Core
+@using System.Net
+@using B3I_Market.Helpers
+@using Microsoft.AspNetCore.Http
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@using ViewModels
+@model BLL.OutputModelsForProfile.UserProfile
+<div class="account_area">
+    <div class="container">
+        <div class="row"  style="flex-wrap: wrap;align-content: space-evenly;justify-content: space-evenly;">
+            @if (User.IsInRole("User"))
+            {
+                <div class="col-md-4">
+                    <div class="single-sidebar">
+                        <h2 class="sidebar-title">Personal Information</h2>
+                        <div class="user-info"><span>Name:</span> @Model.GetUser.Username</div>
+                        <div class="user-info"><span>Mail:</span> @Model.GetUser.Email</div>
+                        <a asp-controller="Account" asp-action="Edit">Edit</a>
+
+
+                    </div>
+                </div>
+            }
+            @if (User.IsInRole("Admin"))
+            {
+                <div class="col-md-4">
+                    <div class="single-sidebar p-2">
+                        <h2 class="sidebar-title">Admin Pannel</h2>
+                        <a asp-controller="Product" asp-action="NewCategory"><input type="submit" value="Add new product category" class="w-100 m-2"></a>
+                        <a asp-controller="Product" asp-action="NewProduct"><input type="submit" value="Add new product" class="w-100 m-2"></a>
+                    </div>
+                </div>
+            }
+            <div class="col-md-8">
+                <h2 style="margin-left: 15px;" class="sidebar-title">Orders</h2>
+                <div style="margin-bottom: 20px;">
+                    @if (User.IsInRole("User"))
+                    {
+                        <form class="form-inline" id="filters" asp-route-changeFilters="true" method="post" asp-action="Index">
+                            <div class="form-group">
+                                Select order status:
+                                <select class="form-control" name="Status" id="status">
+                                    <option> - </option>
+                                    <option id="Completed" value="Completed">Completed</option>
+                                    <option id="Shipped" value="Shipped">Shipped</option>
+                                    <option id="Created" value="Created">Created</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                Select date sorting:
+                                <select class="form-control" id="sort" name="sortType">
+                                    <option> - </option>
+                                    <option id="Old" value="Old">Old first</option>
+                                    <option id="New" value="New">New first</option>
+                                </select>
+                            </div>
+                            <button style="margin-top: 1rem;margin-left: 6rem;" type="submit">Filter</button>
+                            <div>
+                            </div>
+                        </form>
+                    }
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <form asp-action="Index" asp-controller="Account" asp-route-changeFilters="true" id="filters" method="post">
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="status">Select order status</label>
+                                    <select class="form-control" name="Status" id="status">
+                                        <option> - </option>
+                                        <option id="Completed" value="Completed">Completed</option>
+                                        <option id="Shipped" value="Shipped">Shipped</option>
+                                        <option id="Created" value="Created">Created</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="sort">Select date sorting</label>
+                                    <select class="form-control" id="sort" name="sortType">
+                                        <option> - </option>
+                                        <option id="Old" value="Old">Old first</option>
+                                        <option id="New" value="New">New first</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="Id">Search by Id</label>
+                                    <input min="1" max="2147483647" class="form-control" id="Id" name="Id" type="number" placeholder="search by id">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="UserName">Search by Name</label>
+                                    <input maxlength="32" class="form-control" id="UserName" name="UserName" type="text" placeholder="search by user">
+                                </div>
+                            </div>
+                            <button style="margin-left: 15px;" type="submit">Filter</button>
+                            <div>
+                            </div>
+                        </form>
+                    }
+                </div>
+                <div style="margin-left: 15px; float: left" id="container">
+                    @if (Model.GetOrderProduct.Count != 0)
+                    {
+                        @foreach (var (order, product) in Model.GetOrderProduct)
+                        {
+                            <div class="order-list">
+                                <table class="order-list-header">
+                                    <tr>
+                                        <th>Order number</th>
+
+                                        @if (User.IsInRole("Admin"))
+                                        {
+                                            <th>User</th>
+                                        }
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th>Delivery type</th>
+                                        <th>Delivery location</th>
+                                        <th>Total price</th>
+                                    </tr>
+                                    <tr>
+                                        @if (User.IsInRole("User"))
+                                        {
+                                            <td class="order-list-header-item">
+                                                <a asp-controller="Order" asp-action="OrderTimeline" asp-route-id="@order.GetOrder.Id">@order.GetOrder.Id</a>
+                                            </td>
+                                        }
+                                        @if (User.IsInRole("Admin"))
+                                        {
+                                            <td class="order-list-header-item">
+                                                <a asp-controller="Order" asp-action="Info" asp-route-id="@order.GetOrder.Id">@order.GetOrder.Id</a>
+                                            </td>
+                                        }
+                                        @if (User.IsInRole("Admin"))
+                                        {
+                                            <td class="order-list-header-item">
+                                                @order.GetOrder.Username
+                                            </td>
+                                        }
+                                        <td class="order-list-header-item">
+                                            @order.GetOrder.Status
+                                        </td>
+                                        <td class="order-list-header-item">
+                                            @order.GetOrder.Date.ToString()
+                                        </td>
+                                        <td class="order-list-header-item">
+                                            @order.GetOrder.Deliverytype
+                                        </td>
+                                        <td class="order-list-header-item">
+                                            @order.GetOrder.Address
+                                        </td>
+                                        <td class="order-list-header-item">
+                                            @order.GetTotal
+                                        </td>
+                                    </tr>
+                                </table>
+                                <table class="order-list-items">
+                                    <tr>
+                                        <th>Product name</th>
+                                        <th>Amount</th>
+                                        <th>Price</th>
+                                    </tr>
+                                    @foreach (var record in product)
+                                    {
+                                        <tr class="order-list-item">
+                                            <td class="order-list-item-name">
+                                                <a asp-controller="Product" asp-action="Index" asp-route-id="@record.GetProduct._id.ToString()">@record.GetProduct.Name</a>
+                                            </td>
+                                            <td class="order-list-item-amount">
+                                                @record.GetQty
+                                            </td>
+                                            <td class="order-list-item-price">
+                                                @record.GetProduct.Price
+                                            </td>
+
+                                        </tr>
+                                    }
+                                </table>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <h2>No orders</h2>
+                    }
+
+                    <!------------->
+                </div>
+            </div>
+        </div>
+    <div class="row" style="flex-wrap: wrap;align-content: space-evenly;justify-content: space-evenly;">
+        <div class="col-md-4"></div>
+        <div class="col-md-8">
+            <div style="margin-left: 45%; margin-right: 40%;">
+                <nav>
+                    <ul class="pagination" style="display: flex; flex-wrap: nowrap">
+                        @{
+                            var i = 1;
+                            var left = Model.GetTotal;
+                            var qty = Model.GetQty;
+                        }
+                        @while (left > 0 && (Model.GetTotal - Model.GetQty > 0))
+                        {
+                            <li><a asp-action="Index" asp-route-changeFilters="false" asp-route-page="@i">@i</a></li>
+                            left -= qty;
+                            i++;
+                        }
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+    </div>
+</div>
+@{
+   var filters = HttpContextAccessor.HttpContext.Session.Get<ProfileViewModel>("ProfileFilters"); 
+    
+}
+@if(filters!=null)
+{
+    <script>
+if ("@filters.UserName" != ""){
+    document.getElementById("UserName").value = "@filters.UserName";
+}
+
+if ("@filters.SortType" != "-"){
+    document.getElementById("@filters.SortType").selected = true;
+}
+if ("@filters.Status" != "-"){
+    console.log(document.getElementById("@filters.Status"));
+    document.getElementById("@filters.Status").selected = true;
+}
+if (@filters.Id != 0){
+document.getElementById("Id").value = "@filters.Id";
+}
+</script>
+}

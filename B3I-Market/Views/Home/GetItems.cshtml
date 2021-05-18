@@ -1,0 +1,20 @@
+﻿@{
+    Layout = null;
+}
+@model IEnumerable<DAL.Models.City>
+    <select id="city" name="City" class="js-select3">
+        @foreach (var item in Model)
+        {
+            <option value="@item.Name">@item.Name</option>
+        }
+    </select>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.js-select3').select2({
+                placeholder: "Выберите город",
+                maximumSelectionLength: 2,
+                language: "en"
+            });
+        });
+    </script>

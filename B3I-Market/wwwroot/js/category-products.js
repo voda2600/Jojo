@@ -1,0 +1,1 @@
+$(document).ready(function(){let menuElem=document.querySelectorAll('.filter-col-item-selecter');menuElem.forEach(function(item){let titleElem=item.querySelector('.filter-col-item-selecter-header');titleElem.onclick=function(){item.classList.toggle('open')}})})

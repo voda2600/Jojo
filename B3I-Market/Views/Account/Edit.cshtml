@@ -1,0 +1,77 @@
+﻿
+<div class="account_area">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="single-sidebar">
+                    <h2 class="sidebar-title">Edit info</h2>
+                    <form asp-controller="Account" asp-action="EditInfo" method="post">
+                        <div class="user-info"><span>Mail:</span><input name="NewEmail" required type="email" placeholder="New email..."></div>
+                        <input type="submit" value="Save">
+                    </form>
+                    <div>@TempData["EditMailMessage"]</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="single-sidebar">
+                    <h2 class="sidebar-title">Edit password</h2>
+                    <form id="EditPassForm" method="post" asp-controller="Account" asp-action="EditPassword">
+                        <div class="user-info"><span>Current Password:</span><input id="currPass" name="OldPassword" type="password"></div>
+                        <span></span>
+                        <div class="user-info"><span>New Password:</span><input id="newPass" name="NewPassword" type="password"></div>
+                        <span></span>
+                        <div class="user-info"><span>Repeat Password:</span><input id="confPass" name="ConfirmPassword" type="password"></div>
+                        <span></span>
+                        <div style="font-size: 20px; font-weight: 700;">@TempData["EditPasswordMessage"]</div>
+                        <input style="display:block;" type="submit" value="Save">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.3/dist/jquery.validate.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#EditPassForm").validate({
+            rules: {
+                OldPassword: {
+                    required: true,
+                    minlength: 8,
+                    maxlength: 32
+                },
+                NewPassword: {
+                    required: true,
+                    minlength: 8,
+                    maxlength: 32
+                },
+                ConfirmPassword: {
+                    required: true,
+                    equalTo: '#newPass'
+                }
+            },
+            messages: {
+                OldPassword: {
+                    required: "Current password is required",
+                    minlength: "Password must be longer than 8",
+                    maxlength: "Password must be shorter than 32"
+                },
+                NewPassword: {
+                    required: "New password is required",
+                    minlength: "Password must be longer than 8",
+                    maxlength: "Password must be shorter than 32"
+                },
+                ConfirmPassword: {
+                    required: "Confirm password is required",
+                    equalTo: "Passwords don't match"
+                }
+            },
+            errorElement: "span",
+            errorPlacement: function (error, element) {
+                error.insertAfter(element.parent());
+            } 
+        });
+    });
+</script>

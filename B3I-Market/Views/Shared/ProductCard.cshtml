@@ -1,0 +1,120 @@
+@using DAL.Models
+@using Microsoft.FSharp.Collections
+@using BLL
+@using B3I_Market.Helpers
+@model BLL.OutputModelsForCategoryProduct.CategoryProductsModel
+@{
+    FSharpList<OutputModelsForCategoryProduct.ProductCard> products = null;                                                      
+    if (Model != null)
+    {
+        products = Model.GetProducts;
+    }
+}
+@if (products != null && products.Length>0)
+{
+@foreach (var product in products)
+{
+<div class="product-list-item">
+    
+        <div class="product-list-item-image">
+            <div style="display: grid;" class="product-list-item-image-container">
+                <a asp-action="Index" asp-route-id="@product.GetProduct._id.ToString()">
+                    <img style="object-fit: contain;width: 100%;height: 100%;" src="@product.GetProduct.PhotoPath" alt="No image">
+                </a>
+            </div>
+        </div>
+        <div class="product-list-item-description">
+            <div class="product-title">
+                <h3><a asp-action="Index" asp-route-id="@product.GetProduct._id.ToString()">@product.GetProduct.Name</a></h3>
+
+            </div>
+            <div class="product-rating">
+                Rate: @product.GetRating
+            </div>
+            <ul class="product-fields">
+                @foreach (var i in (product.GetProduct.Characteristics ?? new List<Characteristic>()).Where(p=>p.Type!="bool").Take(3))
+
+                {
+                    <li class="product-field">
+                        <span class="product-field-name">
+                            @i.Name
+                        </span>
+                        <span>@i.Value @i.Unit</span>
+                    </li>
+                }
+            </ul>
+        </div>
+        @{
+            var id = product.GetProduct._id.ToString() + "toCard";
+            var container = product.GetProduct._id.ToString() + "itemCheck";
+        }
+
+        <div id="@container" class="product-list-item-check">
+            <div class="product-price">
+                @product.GetProduct.Price
+            </div>
+            @if (Context.Session.Keys.Contains("Card"))
+            {
+                @if (!Context.Session.Get<Dictionary<string, int>>("Card").Keys.Contains(product.GetProduct._id.ToString()))
+                {
+                    <button id="@id" onclick="AddToCard('@product.GetProduct._id.ToString()')" style="padding:0;">
+                        Add to card
+                    </button>
+                }
+                else
+                {
+                    <b>Product in Card</b>
+                }
+            }
+            else if (!User.Identity.IsAuthenticated)
+            {
+                <b>Log In to buy</b>
+            }
+            else
+            {
+               
+
+            }
+        </div>
+
+    </div>
+}
+@if (!Model.GetisItLast)
+{
+    <div class="w-100" style="padding: 2px; text-align: center">
+        <button type="submit" id="More" form="ajax-form">More</button>
+    </div>
+}
+}
+else
+{
+    <h2>Could not find products</h2>
+}
+<script >
+function AddToCard(productId){
+    $.ajax({
+            type: "POST",
+                    url: "@Url.Action("AddToCard", "Product")",
+                    data: {productId: productId},
+                    dataType: "text",
+                    success: function (msg) {
+                        let button = document.getElementById(productId+"toCard");
+                        button.remove();
+                        //button.disabled = true;
+                        //button.innerText = "In Card";
+                        let message = document.createElement("b");
+                        message.innerText=String(msg);
+                        document.getElementById(productId+"itemCheck").appendChild(message);
+                        $("#Card").load(" #Card > *");
+                    },
+                    error: function (error) {
+                        alert(error);
+                    }
+                    
+        });
+}
+</script>
+
+
+
+            

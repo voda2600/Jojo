@@ -1,0 +1,212 @@
+﻿@using DAL.Models
+@model BLL.OutputModelsForCategoryProduct.CategoryProductsModel
+
+@{
+    var category = Model.GetCategory;
+}
+
+<link rel="stylesheet" href="/css/category-products.css" />
+<form hidden data-ajax-complete="OnMoreComplete" id="ajax-form" asp-action="GetMore" data-ajax="true" data-ajax-method="post" data-ajax-mode="after" data-ajax-update="#products" method="post">
+    <input type="hidden" name="offset" id="offset" value="@Model.GetQty">
+    <input type="hidden" name="category" value="@Model.GetCategory.Name">
+    <input type="hidden" name="inputSearch" value="@Model.GetSearch">
+</form>
+<div class="container" style="margin-top:20px; width: fit-content; flex-wrap: wrap">
+    <div class="container" style="flex-wrap: wrap-reverse;">
+        <button class="btn btn-dark d-inline-block d-lg-none ml-auto" style="float: right; text-align: center; margin: auto" type="submit" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="true" aria-label="Toggle navigation">
+            Filter
+        </button>
+        <div class="col-4" style="float: right; align-items: center">
+            <div class="navbar-collapse collapse show" id="navbarSupportedContent" style="min-width: 309px;float: right;">
+                <ul class="nav navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <div>
+                            @*ВОТ ЭТО ТО ЧТО ТОГЛИТСЯ ПО ФАКТУ*@
+                            <div class="filter-col nav item" style="float: right; width: 100%">
+                                <div class="filter-col-header ">
+                                    <div class="filter-col-header-content">
+                                        Filters
+                                    </div>
+                                </div>
+                                <div class="filter-col-items">
+                                    @{
+                                        var i = 0;
+                                    }
+                                    <form asp-action="Filter" data-ajax="true" data-ajax-method="post" data-ajax-mode="replace" data-ajax-update="#products" method="post">
+                                        <input value="@Model.GetCategory.Name" name="Category" type="hidden">
+                                        <input value="@Model.GetSearch" name="inputSearch" type="hidden">
+                                        <div class="filter-col-item-interval">
+                                            <div class="filter-col-item-interval-name">
+                                                Price sorting
+                                            </div>
+                                            <div class="filter-col-item-interval-sides">
+                                                <select class="form-control" name="SortPrice">
+                                                    <option> - </option>
+                                                    <option value="Low">Low Price</option>
+                                                    <option value="High">High Price</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="filter-col-item-interval">
+                                            <div class="filter-col-item-interval-name">
+                                                Rating sorting
+                                            </div>
+                                            <div class="filter-col-item-interval-sides">
+                                                <select class="form-control" name="SortRating">
+                                                    <option> - </option>
+                                                    <option value="Low">Low Rating</option>
+                                                    <option value="High">High Rating</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="filter-col-item-interval">
+                                            <div class="filter-col-item-interval-name">
+                                                Price
+                                            </div>
+                                            <div class="filter-col-item-interval-sides">
+                                                <input type="number" name="MinPrice" class="interval-min">
+                                                <span class="tire"> - </span>
+                                                <input type="number" name="MaxPrice" class="interval-max">
+                                                <span>Р</span>
+                                            </div>
+                                        </div>
+                                        <div class="filter-col-item-interval">
+                                            <div class="filter-col-item-interval-name">
+                                                Rating
+                                            </div>
+                                            <div class="filter-col-item-interval-sides">
+                                                <input max="5" min="0" type="number" name="MinRating" class="interval-min">
+                                                <span class="tire"> - </span>
+                                                <input max="5" min="0" type="number" name="MaxRating" class="interval-max">
+                                            </div>
+                                        </div>
+                                        @foreach (var characteristic in Model.GetCategory.Characteristics ?? new List<Characteristic>())
+                                        {
+                                            <input value="@characteristic.Name" name="Filters[@i].Name" type="hidden">
+                                            <input value="@characteristic.Type" name="Filters[@i].Type" type="hidden">
+                                            if (characteristic.Type == "number")
+                                            {
+                                                <div class="filter-col-item-interval">
+                                                    <div class="filter-col-item-interval-name">
+                                                        @characteristic.Name
+                                                    </div>
+                                                    <div class="filter-col-item-interval-sides">
+                                                        <input type="number" name="Filters[@i].MinValue" class="interval-min">
+                                                        <span class="tire"> - </span>
+                                                        <input type="number" name="Filters[@i].MaxValue" class="interval-max">
+                                                        <span>@characteristic.Unit</span>
+                                                    </div>
+
+                                                </div>
+                                            }
+                                            else if (characteristic.Type == "string" && characteristic.ValueOptions != null)
+                                            {
+                                                <div class="filter-col-item-selecter">
+                                                    <div class="filter-col-item-selecter-header">
+                                                        <span class="filter-col-item-selecter-name">
+                                                            @characteristic.Name
+                                                        </span>
+                                                    </div>
+                                                    <div class="filter-col-item-selecter-items">
+                                                        @foreach (var value in characteristic.ValueOptions)
+                                                        {
+                                                            <div class="filter-col-item-selecter-item">
+                                                                <input id="@characteristic.Name" value="@value" type="checkbox" name="Filters[@i].Values">
+                                                                <span>@value</span>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            }
+                                            else if (characteristic.Type == "bool")
+                                            {
+                                                <div class="filter-col-item-selecter">
+                                                    <div class="filter-col-item-selecter-header">
+                                                        <span class="filter-col-item-selecter-name">
+                                                            @characteristic.Name
+                                                        </span>
+                                                    </div>
+                                                    <div class="filter-col-item-selecter-items">
+                                                        <div class="filter-col-item-selecter-item">
+                                                            <input value="true" name="Filters[@i].CheckBox" type="radio">
+                                                            <span>Yes</span>
+                                                        </div>
+                                                        <div class="filter-col-item-selecter-item">
+                                                            <input value="false" name="Filters[@i].CheckBox" type="radio">
+                                                            <span>No</span>
+                                                        </div>
+                                                        <div class="filter-col-item-selecter-item">
+                                                            <input value="null" name="Filters[@i].CheckBox" type="radio">
+                                                            <span>Not important</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                            i++;
+                                        }
+                                        <div style="text-align: center; padding: 3px">
+                                            <button onclick="OnFilter()" style="margin: auto;" type="submit" id="filer">Filter</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-8" style="float: left">
+            <header class="category-name">
+                <div>
+                    <h2 id="CategoryName">&nbsp;&nbsp;&nbsp;@Model.GetCategory.Name</h2>
+                </div>
+                <div style="display:flex;">
+                    @if (Model.GetSearch != null)
+                    {
+                        <form method="post" asp-action="CategoryProducts">
+                            <input type="hidden" name="category" value="@Model.GetCategory.Name">
+
+
+                            <button type="submit" style="margin-right:5px;">
+                                Discard search
+                            </button>
+
+                        </form>
+                    }
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <form method="post" asp-action="DeleteCategory" asp-controller="Product" asp-route-categoryName="@category.Name">
+                                <button type="submit" style="background-color: #d9534f;">Delete category</button>
+                            </form>
+                        }
+                    }
+                </div>
+            </header>
+            <div class="product-list-row" style="flex-wrap: wrap; width: 100%;">
+                <div>
+                    <div id="products" class="product-col">
+                        @await Html.PartialAsync("ProductCard", Model)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript" src="/js/category-products.js"></script>
+<script >
+function OnMoreComplete(){
+    document.getElementById("offset").value = Number(document.getElementById("offset").value)+Number("@Model.GetQty");
+    let container = document.getElementById("products");
+    document.getElementById("More").remove();
+}
+function OnFilter(){
+    document.getElementById("offset").value = "@Model.GetQty";
+}
+
+</script>
+<script src="/lib/jquery-ajax-unobtrusive/dist/jquery.unobtrusive-ajax.min.js"></script>
+

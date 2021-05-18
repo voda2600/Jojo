@@ -1,0 +1,14 @@
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+
+namespace ViewModels
+{
+    public class LogInViewModel
+    {
+        [Required]
+        public string Name { get; set; }
+        [Required]
+        [DataType(DataType.Password)]
+        public string Password { get; set; }
+    }
+}

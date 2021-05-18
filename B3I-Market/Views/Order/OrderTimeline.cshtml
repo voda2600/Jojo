@@ -1,0 +1,52 @@
+﻿@using System.Globalization
+@model BLL.OutputModelsForProfile.TimeLine
+@{
+  Layout = "_Layout";
+  var list = Model.GetLine;
+  var order = Model.GetOrder;
+}
+<bodyordertimeline>
+    <!-- Vertical Timeline -->
+    <section id="conference-timeline" style="width: auto">
+      <div class="timeline-start">Timeline</div>
+      <div class="conference-center-line"></div>
+      <div class="conference-timeline-content">
+        <div class="timeline-article">
+          <div class="content-right-container">
+            <div class="content-right" style="float: left;">
+              <h3>Order @order.Id created</h3>
+            </div>
+          </div>
+          <div class="meta-date">
+            <span class="date">@order.Date.Day</span>
+            <span class="month">@order.Date.ToString("MMM", CultureInfo.InvariantCulture)</span>
+          </div>
+        </div>
+        @{
+          var i = 1;
+        }
+        @if (list != null && list?.Count > 0)
+        {
+          @foreach (var record in list)
+          {
+            <div class="timeline-article">
+              <div class="content-right-container">
+                <div class="content-right">
+                  <h3>Status changed to @record.Status</h3>
+                </div>
+              </div>
+              <div class="meta-date">
+                <span class="date">@record.Time.Day</span>
+                <span class="month">@record.Time.ToString("MMM", CultureInfo.InvariantCulture)</span>
+              </div>
+            </div>
+            i++;
+          }
+        }
+
+        <!-- // Article -->
+      </div>
+      <div class="timeline-end">Timeline</div>
+    </section>
+    <!-- // Vertical Timeline -->
+  </bodyordertimeline>
